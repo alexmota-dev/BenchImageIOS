@@ -2,7 +2,7 @@
 //  BenchImageIOSApp.swift
 //  BenchImageIOS
 //
-//  Created by Vitória Kelly on 22/09/25.
+//  Created by Alex Mota on 22/09/25.
 //
 
 import SwiftUI
@@ -11,7 +11,7 @@ import SwiftUI
 struct BenchImageIOSApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: BenchImageViewModel())
         }
     }
 }

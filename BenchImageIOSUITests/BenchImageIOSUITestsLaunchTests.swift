@@ -2,7 +2,7 @@
 //  BenchImageIOSUITestsLaunchTests.swift
 //  BenchImageIOSUITests
 //
-//  Created by Vitória Kelly on 22/09/25.
+//  Created by Alex Mota on 22/09/25.
 //
 
 import XCTest
