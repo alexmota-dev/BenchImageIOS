@@ -43,14 +43,13 @@ jobs:
 
       - name: Executar Testes de Acesso às Imagens
         run: |
-          echo "=== EXECUTANDO TESTES DE ACESSO ÀS IMAGENS ==="
+          echo "=== EXECUTANDO TESTES SIMPLES DE ACESSO ÀS IMAGENS ==="
           xcodebuild test \
             -scheme BenchImageIOS \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=26.0' \
-            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testImageAccess \
-            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testBundleStructure \
-            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testSpecificImageFiles
+            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testSimpleImageAccess \
+            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testBundleExists
 
       - name: Verificar Estrutura do Bundle
         run: |

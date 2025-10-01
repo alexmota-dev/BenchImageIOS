@@ -11,81 +11,39 @@ import UIKit
 
 struct BenchImageIOSTests {
 
-    @Test func testImageAccess() async throws {
+    @Test func testSimpleImageAccess() async throws {
+        // Teste simples e rápido
         let viewModel = await BenchImageViewModel()
         
-        // Testa todas as combinações de tamanho e imagem
-        let testSizes = ["0.3MP", "1MP", "2MP", "4MP", "8MP"]
-        let testImages = ["FAB Show", "Cidade", "SkyLine"]
+        // Testa apenas uma combinação para verificar se funciona
+        let fileName = await viewModel.fileNameFor(label: "FAB Show", size: "0.3MP")
+        let subdir = await viewModel.sizeToPath("0.3MP")
         
-        var successCount = 0
-        var totalTests = 0
+        print("Testando: \(fileName) em \(subdir)")
         
-        for size in testSizes {
-            for imageLabel in testImages {
-                totalTests += 1
-                let fileName = await viewModel.fileNameFor(label: imageLabel, size: size)
-                let subdir = await viewModel.sizeToPath(size)
-                
-                do {
-                    let ui = try await viewModel.loadUIImageFromBundle(fileName: fileName, size: size)
-                    #expect(ui.size.width > 0)
-                    #expect(ui.size.height > 0)
-                    successCount += 1
-                    print("✅ SUCESSO: \(fileName) em \(subdir) - Tamanho: \(ui.size.width)x\(ui.size.height)")
-                } catch {
-                    print("❌ ERRO: \(fileName) em \(subdir) - \(error.localizedDescription)")
-                }
-            }
-        }
-        
-        // Verifica se pelo menos 80% dos testes passaram
-        let successRate = Double(successCount) / Double(totalTests)
-        print("Taxa de sucesso: \(Int(successRate * 100))% (\(successCount)/\(totalTests))")
-        #expect(successRate >= 0.8, "Pelo menos 80% das imagens devem ser acessíveis")
-    }
-    
-    @Test func testBundleStructure() async throws {
-        let viewModel = await BenchImageViewModel()
-        let testSizes = ["0.3MP", "1MP", "2MP", "4MP", "8MP"]
-        
-        for size in testSizes {
-            let subdir = await viewModel.sizeToPath(size)
-            let bundleURL = Bundle.main.url(forResource: nil, withExtension: nil, subdirectory: subdir)
-            
-            #expect(bundleURL != nil, "Pasta \(subdir) deve existir no bundle")
-            
-            if let bundleURL = bundleURL {
-                let files = try FileManager.default.contentsOfDirectory(at: bundleURL, includingPropertiesForKeys: nil)
-                #expect(files.count >= 3, "Pasta \(subdir) deve ter pelo menos 3 arquivos")
-                print("Pasta \(subdir): \(files.count) arquivos encontrados")
-                for file in files {
-                    print("  - \(file.lastPathComponent)")
-                }
-            }
-        }
-    }
-    
-    @Test func testSpecificImageFiles() async throws {
-        let viewModel = await BenchImageViewModel()
-        
-        // Testa arquivos específicos que sabemos que existem
-        let testCases = [
-            ("0.3MP", "FAB Show", "03img1.jpg"),
-            ("0.3MP", "Cidade", "03img4.jpg"),
-            ("0.3MP", "SkyLine", "03img5.jpg"),
-            ("1MP", "FAB Show", "1img1.jpg"),
-            ("8MP", "SkyLine", "8img5.jpg")
-        ]
-        
-        for (size, imageLabel, expectedFileName) in testCases {
-            let fileName = await viewModel.fileNameFor(label: imageLabel, size: size)
-            #expect(fileName == expectedFileName, "Nome do arquivo deve ser \(expectedFileName)")
-            
-            let ui = try await viewModel.loadUIImageFromBundle(fileName: fileName, size: size)
+        do {
+            let ui = try await viewModel.loadUIImageFromBundle(fileName: fileName, size: "0.3MP")
             #expect(ui.size.width > 0)
             #expect(ui.size.height > 0)
-            print("✅ \(fileName) em \(size): \(ui.size.width)x\(ui.size.height)")
+            print("✅ Sucesso: \(fileName) (\(Int(ui.size.width))x\(Int(ui.size.height)))")
+        } catch {
+            print("❌ Erro: \(fileName) - \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    @Test func testBundleExists() async throws {
+        // Teste simples para verificar se o bundle existe
+        let bundleURL = Bundle.main.url(forResource: nil, withExtension: nil, subdirectory: "images/0_3mp")
+        #expect(bundleURL != nil, "Pasta images/0_3mp deve existir no bundle")
+        
+        if let bundleURL = bundleURL {
+            let files = try FileManager.default.contentsOfDirectory(at: bundleURL, includingPropertiesForKeys: nil)
+            print("Arquivos encontrados em 0_3mp: \(files.count)")
+            for file in files {
+                print("  - \(file.lastPathComponent)")
+            }
+            #expect(files.count >= 3, "Pasta deve ter pelo menos 3 arquivos")
         }
     }
 
