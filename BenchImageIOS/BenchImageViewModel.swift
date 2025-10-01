@@ -21,6 +21,10 @@ final class BenchImageViewModel: ObservableObject {
     @Published var showErrorAlert: Bool = false
     @Published var unsupportedMessage: String = ""
     @Published var errorMessage: String = "Status: Error during the transmission!"
+    
+    // Para o teste de acesso às imagens
+    @Published var testResults: String = ""
+    @Published var showTestResults: Bool = false
 
     // pickers data
     let images: [String]  = ["FAB Show", "Cidade", "SkyLine"]
@@ -156,13 +160,13 @@ final class BenchImageViewModel: ObservableObject {
         }
     }
 
-    // nome final do arquivo conforme sua convenção ("<prefixo><basename>")
-    private func fileNameFor(label: String, size: String) -> String {
-        sizePrefix(size) + baseName(for: label)
+    // nome final do arquivo - os arquivos reais não têm prefixo
+    func fileNameFor(label: String, size: String) -> String {
+        baseName(for: label)
     }
 
     // ====== BUNDLE LOADER (pasta images/<size>) ======
-    private func sizeToPath(_ size: String) -> String {
+    func sizeToPath(_ size: String) -> String {
         switch size {
         case "8MP":   return "images/8mp"
         case "4MP":   return "images/4mp"
@@ -173,7 +177,7 @@ final class BenchImageViewModel: ObservableObject {
         }
     }
 
-    private func loadUIImageFromBundle(fileName: String, size: String) throws -> UIImage {
+    func loadUIImageFromBundle(fileName: String, size: String) throws -> UIImage {
         let subdir = sizeToPath(size)
         guard let url = Bundle.main.url(forResource: fileName, withExtension: nil, subdirectory: subdir),
               let data = try? Data(contentsOf: url),
@@ -183,5 +187,60 @@ final class BenchImageViewModel: ObservableObject {
                           userInfo: [NSLocalizedDescriptionKey: "Nao achei \(fileName) em \(subdir)"])
         }
         return ui
+    }
+    
+    // ====== EXECUTAR TESTE DE ACESSO ÀS IMAGENS ======
+    func runImageAccessTest() {
+        testResults = testImageAccess()
+        showTestResults = true
+    }
+    
+    // ====== FUNÇÃO DE TESTE PARA VERIFICAR ACESSO ÀS IMAGENS ======
+    private func testImageAccess() -> String {
+        var results: [String] = []
+        results.append("=== TESTE DE ACESSO ÀS IMAGENS ===")
+        
+        // Testa todas as combinações de tamanho e imagem
+        let testSizes = ["0.3MP", "1MP", "2MP", "4MP", "8MP"]
+        let testImages = ["FAB Show", "Cidade", "SkyLine"]
+        
+        for size in testSizes {
+            results.append("\n--- Testando tamanho: \(size) ---")
+            let subdir = sizeToPath(size)
+            results.append("Pasta: \(subdir)")
+            
+            for imageLabel in testImages {
+                let fileName = fileNameFor(label: imageLabel, size: size)
+                results.append("Arquivo: \(fileName)")
+                
+                do {
+                    let ui = try loadUIImageFromBundle(fileName: fileName, size: size)
+                    results.append("✅ SUCESSO: \(fileName) - Tamanho: \(ui.size.width)x\(ui.size.height)")
+                } catch {
+                    results.append("❌ ERRO: \(fileName) - \(error.localizedDescription)")
+                }
+            }
+        }
+        
+        // Testa se consegue listar arquivos no bundle
+        results.append("\n--- Testando listagem de arquivos no bundle ---")
+        for size in testSizes {
+            let subdir = sizeToPath(size)
+            if let bundleURL = Bundle.main.url(forResource: nil, withExtension: nil, subdirectory: subdir) {
+                do {
+                    let files = try FileManager.default.contentsOfDirectory(at: bundleURL, includingPropertiesForKeys: nil)
+                    results.append("Pasta \(subdir): \(files.count) arquivos encontrados")
+                    for file in files {
+                        results.append("  - \(file.lastPathComponent)")
+                    }
+                } catch {
+                    results.append("❌ Erro ao listar \(subdir): \(error.localizedDescription)")
+                }
+            } else {
+                results.append("❌ Pasta \(subdir) não encontrada no bundle")
+            }
+        }
+        
+        return results.joined(separator: "\n")
     }
 }
