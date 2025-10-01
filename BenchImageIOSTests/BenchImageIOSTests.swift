@@ -12,7 +12,7 @@ import UIKit
 struct BenchImageIOSTests {
 
     @Test func testImageAccess() async throws {
-        let viewModel = BenchImageViewModel()
+        let viewModel = await BenchImageViewModel()
         
         // Testa todas as combinações de tamanho e imagem
         let testSizes = ["0.3MP", "1MP", "2MP", "4MP", "8MP"]
@@ -24,11 +24,11 @@ struct BenchImageIOSTests {
         for size in testSizes {
             for imageLabel in testImages {
                 totalTests += 1
-                let fileName = viewModel.fileNameFor(label: imageLabel, size: size)
-                let subdir = viewModel.sizeToPath(size)
+                let fileName = await viewModel.fileNameFor(label: imageLabel, size: size)
+                let subdir = await viewModel.sizeToPath(size)
                 
                 do {
-                    let ui = try viewModel.loadUIImageFromBundle(fileName: fileName, size: size)
+                    let ui = try await viewModel.loadUIImageFromBundle(fileName: fileName, size: size)
                     #expect(ui.size.width > 0)
                     #expect(ui.size.height > 0)
                     successCount += 1
@@ -46,11 +46,11 @@ struct BenchImageIOSTests {
     }
     
     @Test func testBundleStructure() async throws {
-        let viewModel = BenchImageViewModel()
+        let viewModel = await BenchImageViewModel()
         let testSizes = ["0.3MP", "1MP", "2MP", "4MP", "8MP"]
         
         for size in testSizes {
-            let subdir = viewModel.sizeToPath(size)
+            let subdir = await viewModel.sizeToPath(size)
             let bundleURL = Bundle.main.url(forResource: nil, withExtension: nil, subdirectory: subdir)
             
             #expect(bundleURL != nil, "Pasta \(subdir) deve existir no bundle")
@@ -67,7 +67,7 @@ struct BenchImageIOSTests {
     }
     
     @Test func testSpecificImageFiles() async throws {
-        let viewModel = BenchImageViewModel()
+        let viewModel = await BenchImageViewModel()
         
         // Testa arquivos específicos que sabemos que existem
         let testCases = [
@@ -79,10 +79,10 @@ struct BenchImageIOSTests {
         ]
         
         for (size, imageLabel, expectedFileName) in testCases {
-            let fileName = viewModel.fileNameFor(label: imageLabel, size: size)
+            let fileName = await viewModel.fileNameFor(label: imageLabel, size: size)
             #expect(fileName == expectedFileName, "Nome do arquivo deve ser \(expectedFileName)")
             
-            let ui = try viewModel.loadUIImageFromBundle(fileName: fileName, size: size)
+            let ui = try await viewModel.loadUIImageFromBundle(fileName: fileName, size: size)
             #expect(ui.size.width > 0)
             #expect(ui.size.height > 0)
             print("✅ \(fileName) em \(size): \(ui.size.width)x\(ui.size.height)")
