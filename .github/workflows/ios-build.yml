@@ -1,0 +1,40 @@
+name: iOS Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Instalar dependências (CocoaPods se necessário)
+        run: |
+          if [ -f "Podfile" ]; then
+            sudo gem install cocoapods
+            pod install --repo-update
+          fi
+
+      - name: Build iOS App
+        run: |
+          xcodebuild \
+            -scheme SeuApp \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            clean build
+
+      # Opcional: gerar artefato (binário do app ou logs)
+      - name: Salvar build como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-output
+          path: build
