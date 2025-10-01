@@ -15,6 +15,7 @@ struct ContentView: View {
                 labelsRow2
                 pickersRow2
                 computeButtonRow
+                testButtonRow
                 benchmarkToggle
             }
             .padding(16)
@@ -39,6 +40,11 @@ struct ContentView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage)
+        }
+        .alert("Teste de Acesso às Imagens", isPresented: $viewModel.showTestResults) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.testResults)
         }
     }
 
@@ -162,6 +168,22 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(viewModel.isComputing)
+            Spacer()
+        }
+    }
+
+    private var testButtonRow: some View {
+        HStack {
+            Spacer()
+            Button {
+                viewModel.runImageAccessTest()
+            } label: {
+                Text("TESTAR ACESSO ÀS IMAGENS")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(maxWidth: 250)
+            }
+            .buttonStyle(.bordered)
+            .foregroundColor(.blue)
             Spacer()
         }
     }

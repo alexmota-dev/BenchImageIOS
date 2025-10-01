@@ -40,6 +40,24 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
             clean build
 
+      - name: Executar Testes de Acesso às Imagens
+        run: |
+          echo "=== EXECUTANDO TESTES DE ACESSO ÀS IMAGENS ==="
+          xcodebuild test \
+            -scheme BenchImageIOS \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
+            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testImageAccess \
+            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testBundleStructure \
+            -only-testing:BenchImageIOSTests/BenchImageIOSTests/testSpecificImageFiles
+
+      - name: Verificar Estrutura do Bundle
+        run: |
+          echo "=== VERIFICANDO ESTRUTURA DO BUNDLE ==="
+          find . -name "*.jpg" -path "*/Resources/images/*" | head -20
+          echo "=== LISTANDO PASTAS DE IMAGENS ==="
+          find . -type d -path "*/Resources/images/*" | sort
+
       - name: Salvar build como artefato
         uses: actions/upload-artifact@v4
         with:
