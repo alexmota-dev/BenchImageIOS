@@ -157,12 +157,12 @@ final class BenchImageViewModel: ObservableObject {
     }
 
     // nome final do arquivo conforme sua convenção ("<prefixo><basename>")
-    private func fileNameFor(label: String, size: String) -> String {
+    func fileNameFor(label: String, size: String) -> String {
         sizePrefix(size) + baseName(for: label)
     }
 
     // ====== BUNDLE LOADER (pasta images/<size>) ======
-    private func sizeToPath(_ size: String) -> String {
+    func sizeToPath(_ size: String) -> String {
         switch size {
         case "8MP":   return "images/8mp"
         case "4MP":   return "images/4mp"
@@ -173,7 +173,7 @@ final class BenchImageViewModel: ObservableObject {
         }
     }
 
-    private func loadUIImageFromBundle(fileName: String, size: String) throws -> UIImage {
+    func loadUIImageFromBundle(fileName: String, size: String) throws -> UIImage {
         let subdir = sizeToPath(size)
         guard let url = Bundle.main.url(forResource: fileName, withExtension: nil, subdirectory: subdir),
               let data = try? Data(contentsOf: url),
